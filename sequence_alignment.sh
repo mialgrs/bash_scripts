@@ -17,12 +17,12 @@ for fna in ${fastq[@]}; do
 	# if fastq name ends with _1
 	if [[ $fna == *_1 ]]; then
 
-		file2=${fna/%_1/_2}
+		file2=${fna/%1/2}
 		out=${fna/%_1}
 
 		# if file $out.sam do not exist
-		if [ ! -e $out.sam ]; then
-			bowtie2 -p 12 -x ~/index/ref_t2t/t2t -1 $fna.fastq.gz -2 $file2.fastq.gz > $out.sam
+		if [ ! -e $out.sorted.bam ]; then
+			bowtie2 -p 12 -x ~/index/ref_t2t/t2t -1 $fna.trimmed.fastq.gz -2 $file2.trimmed.fastq.gz > $out.sam
 			samtools view -@ 12 -bS $out.sam | samtools sort -@ 12 -o $out.sorted.bam
 			rm -rf $out.sam
 			samtools index -@ 12 $out.sorted.bam
@@ -32,7 +32,7 @@ for fna in ${fastq[@]}; do
 		continue
 
 	else
-		if [ ! -e $fna.sam ]; then
+		if [ ! -e $fna.sorted.bam ]; then
 			bowtie2 -p 12 -x ~/index/ref_t2t/t2t $fna.fastq.gz > $fna.sam
 			samtools view -@ 12 -bS $fna.sam | samtools sort -@ 12 -o $fna.sorted.bam
 			rm -rf $fna.sam

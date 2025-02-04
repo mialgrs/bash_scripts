@@ -1,0 +1,25 @@
+#!/bin/bash
+# Go to the right directory 
+
+# Check if at least one argument is provided
+if [ $# -eq 0 ]; then
+	echo "Error: No arguments provided. \nUsage: $0 <workdir> <adapter> [arg3] ..."
+	exit 1
+fi
+
+dir=$1
+
+cd $dir
+
+bam=$(ls *.bam | cut -d. -f1 | sort -u)
+echo $bam
+
+mkdir trim_data
+
+for file in ${bam[@]}; do
+
+	macs3 callpeak -t $file.bam -c fastq/process/chip_input_std.bam -f BAMPE -g hs -n standard -B
+	macs3 bdgcmp -t standard_treat_pileup.bdg -c standard_control_lambda.bdg -o standard_FE.bdg -m FE
+	./../../chromToUcsc -i standard_FE.bdg  -o standard_FE_ucsc.bdg -a ../T2T/T2T.chromAlias.tsv
+	./bdg2bw ~/data/transfer/macs/ standard_FE_ucsc.bdg ~/data/T2T/T2T.chrom.sizes
+done
